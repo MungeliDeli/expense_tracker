@@ -1,4 +1,5 @@
-import { LogOut, Wallet } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import { AppLogo, APP_NAME } from '../AppLogo';
 import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
 import { ThemeSettings } from '../ThemeSettings';
@@ -21,11 +22,9 @@ export const Header = () => {
     <header className="sticky top-0 z-40 border-b border-[rgba(var(--border),0.4)] glass backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
-            <Wallet size={18} />
-          </div>
+          <AppLogo size="md" />
           <div>
-            <h1 className="text-base font-bold text-foreground sm:text-lg">Expense Tracker</h1>
+            <h1 className="text-base font-bold text-foreground sm:text-lg">{APP_NAME}</h1>
             <p className="text-xs text-muted hidden sm:block">Personal finance dashboard</p>
           </div>
         </div>

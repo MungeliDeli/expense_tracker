@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, Wallet, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff } from 'lucide-react';
+import { AppLogo, APP_NAME } from '../../components/AppLogo';
 import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
 import { AnimatedBackground } from '../../components/AnimatedBackground';
@@ -71,13 +72,9 @@ export const LoginPage = () => {
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
       >
         <div className="glass rounded-3xl card-shadow-lg p-8 sm:p-10">
-          {/* Logo */}
           <div className="mb-8 flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg">
-              <Wallet size={28} />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Expense Tracker</h1>
-            <p className="mt-1 text-sm text-muted">Track your spending in Zambian Kwacha</p>
+            <AppLogo size="lg" className="mb-5" />
+            <h1 className="text-3xl font-bold text-foreground">{APP_NAME}</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -109,7 +106,7 @@ export const LoginPage = () => {
           </form>
 
           <p className="mt-6 text-center text-xs text-muted">
-            Personal expense tracker — secured with JWT authentication
+            Smart personal finance
           </p>
         </div>
       </motion.div>
