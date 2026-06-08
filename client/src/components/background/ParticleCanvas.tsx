@@ -12,6 +12,17 @@ interface Particle {
 
 const CONNECTION_DISTANCE = 160;
 
+const toCanvasRgb = (value: string): string => {
+  const parts = value.trim().split(/\s+/).map(Number);
+  if (parts.length >= 3 && parts.every((n) => !Number.isNaN(n))) {
+    return `${parts[0]}, ${parts[1]}, ${parts[2]}`;
+  }
+  return value;
+};
+
+const toRgba = (value: string, alpha: number): string =>
+  `rgba(${toCanvasRgb(value)}, ${alpha})`;
+
 export const ParticleCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -98,14 +109,14 @@ export const ParticleCanvas = () => {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, r * 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${glow}, 0.08)`;
+        ctx.fillStyle = toRgba(glow, 0.08);
         ctx.fill();
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${particle}, 0.9)`;
+        ctx.fillStyle = toRgba(particle, 0.9);
         ctx.shadowBlur = 12;
-        ctx.shadowColor = `rgba(${glow}, 0.8)`;
+        ctx.shadowColor = toRgba(glow, 0.8);
         ctx.fill();
         ctx.shadowBlur = 0;
       }
@@ -121,9 +132,9 @@ export const ParticleCanvas = () => {
               particles[i].x, particles[i].y,
               particles[j].x, particles[j].y
             );
-            gradient.addColorStop(0, `rgba(${glow}, ${alpha})`);
-            gradient.addColorStop(0.5, `rgba(${accent}, ${alpha * 1.2})`);
-            gradient.addColorStop(1, `rgba(${glow}, ${alpha})`);
+            gradient.addColorStop(0, toRgba(glow, alpha));
+            gradient.addColorStop(0.5, toRgba(accent, alpha * 1.2));
+            gradient.addColorStop(1, toRgba(glow, alpha));
 
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);

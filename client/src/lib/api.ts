@@ -1,6 +1,12 @@
 import type { Expense, ExpenseStats, ExpensesResponse } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || "/api";
+const normalizeApiBase = (value: string | undefined): string => {
+  if (!value) return '/api';
+  const trimmed = value.replace(/\/$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const API_BASE = normalizeApiBase(import.meta.env.VITE_API_URL);
 
 class ApiError extends Error {
   status: number;
