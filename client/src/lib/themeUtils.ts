@@ -2,6 +2,12 @@ import type { RGB, ThemeTokens } from './themes';
 
 export const rgbToCss = ([r, g, b]: RGB): string => `${r} ${g} ${b}`;
 
+const setThemeColorMeta = (rgb: RGB): void => {
+  const content = `rgb(${rgb[0]} ${rgb[1]} ${rgb[2]})`;
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', content);
+};
+
 const TOKEN_KEYS: (keyof ThemeTokens)[] = [
   'primary', 'primaryLight', 'primaryDark', 'background', 'backgroundSecondary',
   'foreground', 'card', 'cardForeground', 'accent', 'border', 'muted', 'mutedBg',
@@ -53,6 +59,8 @@ export const applyThemeTokens = (tokens: ThemeTokens, themeId?: string): void =>
     '--shadow-lg',
     `0 12px 40px rgba(${rgbToCss(tokens.glowColor)}, 0.25)`
   );
+
+  setThemeColorMeta(tokens.background);
 
   if (themeId) {
     root.setAttribute('data-theme-id', themeId);

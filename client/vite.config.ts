@@ -14,7 +14,7 @@ export default defineConfig({
         name: 'SpendWise',
         short_name: 'SpendWise',
         description: 'Personal expense tracker — track spending in Zambian Kwacha',
-        theme_color: '#2563eb',
+        theme_color: '#0a0f1e',
         background_color: '#0a0f1e',
         display: 'standalone',
         orientation: 'portrait',

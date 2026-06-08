@@ -1,34 +1,39 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { Admin } from '../models/Admin';
 import { AuthRequest } from '../middleware/auth';
 
-const TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SHORT_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+const LONG_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-const signToken = (): string => {
+const signToken = (expiresIn: SignOptions['expiresIn']): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error('JWT_SECRET is not defined');
-  return jwt.sign({ role: 'admin' }, secret, { expiresIn: '7d' });
+  return jwt.sign({ role: 'admin' }, secret, { expiresIn });
 };
 
-const setTokenCookie = (res: Response, token: string): void => {
+const setTokenCookie = (res: Response, token: string, maxAge: number): void => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: TOKEN_MAX_AGE,
+    maxAge,
   });
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { password } = req.body;
+    const { password, rememberMe } = req.body as { password?: unknown; rememberMe?: unknown };
 
     if (!password || typeof password !== 'string') {
       res.status(400).json({ message: 'Password is required' });
       return;
     }
+
+    const remember = rememberMe === true;
+    const maxAge = remember ? LONG_TOKEN_MAX_AGE : SHORT_TOKEN_MAX_AGE;
+    const expiresIn: SignOptions['expiresIn'] = remember ? '30d' : '7d';
 
     const admin = await Admin.findOne();
     if (!admin) {
@@ -42,8 +47,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = signToken();
-    setTokenCookie(res, token);
+    const token = signToken(expiresIn);
+    setTokenCookie(res, token, maxAge);
 
     res.json({
       message: 'Login successful',

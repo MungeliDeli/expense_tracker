@@ -11,7 +11,23 @@ class ApiError extends Error {
   }
 }
 
-const getToken = (): string | null => localStorage.getItem('token');
+const getToken = (): string | null =>
+  sessionStorage.getItem('token') || localStorage.getItem('token');
+
+const setToken = (token: string, rememberMe: boolean): void => {
+  if (rememberMe) {
+    localStorage.setItem('token', token);
+    sessionStorage.removeItem('token');
+    return;
+  }
+  sessionStorage.setItem('token', token);
+  localStorage.removeItem('token');
+};
+
+const clearToken = (): void => {
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+};
 
 const request = async <T>(
   endpoint: string,
@@ -27,33 +43,51 @@ const request = async <T>(
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+      credentials: 'include',
+    });
+  } catch {
+    throw new ApiError('Cannot reach the server. Please try again in a moment.', 0);
+  }
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new ApiError(data.message || 'Request failed', response.status);
+    const contentType = response.headers.get('content-type') || '';
+    const data =
+      contentType.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : {};
+
+    const message =
+      (data as { message?: string }).message ||
+      (response.status === 401
+        ? 'Your session expired. Please sign in again.'
+        : response.status >= 500
+        ? 'Server error. Please try again in a moment.'
+        : 'Request failed');
+
+    throw new ApiError(message, response.status);
   }
 
   return response.json();
 };
 
 export const authApi = {
-  login: async (password: string) => {
+  login: async (password: string, rememberMe: boolean) => {
     const data = await request<{ token: string; message: string }>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ password, rememberMe }),
     });
-    localStorage.setItem('token', data.token);
+    setToken(data.token, rememberMe);
     return data;
   },
 
   logout: async () => {
     await request('/auth/logout', { method: 'POST' });
-    localStorage.removeItem('token');
+    clearToken();
   },
 
   verify: () => request<{ authenticated: boolean }>('/auth/verify'),

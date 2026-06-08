@@ -4,7 +4,7 @@ import { authApi } from '../lib/api';
 interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (password: string) => Promise<void>;
+  login: (password: string, rememberMe: boolean) => Promise<void>;
   logout: () => Promise<void>;
   verify: () => Promise<void>;
 }
@@ -13,8 +13,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isLoading: true,
 
-  login: async (password: string) => {
-    await authApi.login(password);
+  login: async (password: string, rememberMe: boolean) => {
+    await authApi.login(password, rememberMe);
     set({ isAuthenticated: true });
   },
 
@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   verify: async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
       if (!token) {
         set({ isAuthenticated: false, isLoading: false });
         return;
@@ -37,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isAuthenticated: true, isLoading: false });
     } catch {
       localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       set({ isAuthenticated: false, isLoading: false });
     }
   },

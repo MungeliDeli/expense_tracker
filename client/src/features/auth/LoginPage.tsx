@@ -15,6 +15,7 @@ import { ToastContainer } from '../../components/ToastContainer';
 export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,7 +46,7 @@ export const LoginPage = () => {
 
     setIsLoading(true);
     try {
-      await login(password);
+      await login(password, rememberMe);
       addToast('Welcome back!', 'success');
       navigate('/dashboard');
     } catch (err) {
@@ -98,6 +99,16 @@ export const LoginPage = () => {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
+            <label className="flex items-center gap-2 text-sm text-muted select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-border bg-card accent-[rgb(var(--primary))]"
+              />
+              Remember me
+            </label>
 
             <Button type="submit" className="w-full" size="lg" isLoading={isLoading}>
               <Lock size={18} />
