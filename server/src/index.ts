@@ -1,20 +1,21 @@
-import express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
-import { connectDB } from './config/db';
-import { Admin } from './models/Admin';
-import authRoutes from './routes/auth';
-import expenseRoutes from './routes/expenses';
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import { connectDB } from "./config/db";
+import { Admin } from "./models/Admin";
+import authRoutes from "./routes/auth";
+import expenseRoutes from "./routes/expenses";
+import incomeRoutes from "./routes/income";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const clientOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
+const clientOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
@@ -28,17 +29,18 @@ app.use(
       callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
 
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/expenses', expenseRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/expenses", expenseRoutes);
+app.use("/api/income", incomeRoutes);
 
 const seedAdmin = async (): Promise<void> => {
   const existing = await Admin.findOne();
@@ -46,13 +48,13 @@ const seedAdmin = async (): Promise<void> => {
 
   const password = process.env.ADMIN_PASSWORD;
   if (!password) {
-    console.warn('ADMIN_PASSWORD not set — admin account will not be created');
+    console.warn("ADMIN_PASSWORD not set — admin account will not be created");
     return;
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
   await Admin.create({ passwordHash });
-  console.log('Admin account created from ADMIN_PASSWORD');
+  console.log("Admin account created from ADMIN_PASSWORD");
 };
 
 const startServer = async (): Promise<void> => {
@@ -64,7 +66,7 @@ const startServer = async (): Promise<void> => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
 };

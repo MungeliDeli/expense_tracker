@@ -1,4 +1,4 @@
-import type { Expense, ExpenseStats, ExpensesResponse } from '../types';
+import type { Expense, ExpenseStats, ExpensesResponse, Income, IncomeStats, IncomeResponse } from '../types';
 
 const normalizeApiBase = (value: string | undefined): string => {
   if (!value) return '/api';
@@ -123,6 +123,32 @@ export const expensesApi = {
 
   delete: (id: string) =>
     request<{ message: string }>(`/expenses/${id}`, { method: 'DELETE' }),
+};
+
+export const incomeApi = {
+  getAll: (params: Record<string, string | number>) => {
+    const query = new URLSearchParams(
+      Object.entries(params).map(([k, v]) => [k, String(v)])
+    ).toString();
+    return request<IncomeResponse>(`/income?${query}`);
+  },
+
+  getStats: () => request<IncomeStats>('/income/stats'),
+
+  create: (data: Omit<Income, '_id' | 'createdAt'>) =>
+    request<Income>('/income', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: Partial<Omit<Income, '_id' | 'createdAt'>>) =>
+    request<Income>(`/income/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    request<{ message: string }>(`/income/${id}`, { method: 'DELETE' }),
 };
 
 export { ApiError };

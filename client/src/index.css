@@ -66,10 +66,8 @@ body {
 .border-border { border-color: rgb(var(--border)); }
 
 .glass {
-  background: rgba(var(--glass), 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(var(--border), 0.4);
+  background: rgb(var(--card));
+  border: 1px solid rgba(var(--border), 0.5);
   transition: background 1.4s ease, border-color 1.4s ease;
 }
 

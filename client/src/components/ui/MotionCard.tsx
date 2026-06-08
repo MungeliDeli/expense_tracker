@@ -28,7 +28,7 @@ export const MotionCard = forwardRef<HTMLDivElement, MotionCardProps>(
       }
       className={cn(
         'rounded-2xl border border-[rgba(var(--border),0.5)] card-shadow p-5',
-        'bg-[rgba(var(--card),0.72)] backdrop-blur-xl',
+        'bg-card',
         'transition-colors duration-500',
         className
       )}

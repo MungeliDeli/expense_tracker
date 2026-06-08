@@ -2,38 +2,38 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { expensesApi } from '../../lib/api';
-import { CATEGORIES } from '../../lib/constants';
+import { incomeApi } from '../../lib/api';
+import { INCOME_SOURCES } from '../../lib/constants';
 import { useToastStore } from '../../store/toastStore';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Card } from '../../components/ui/Card';
-import type { ExpenseCategory, ExpenseFormData } from '../../types';
+import type { IncomeSource, IncomeFormData } from '../../types';
 
-interface ExpenseFormProps {
+interface IncomeFormProps {
   onSuccess: () => void;
   onClose?: () => void;
   inModal?: boolean;
 }
 
-const initialForm: ExpenseFormData = {
+const initialForm: IncomeFormData = {
   amount: '',
-  category: '',
+  source: '',
   description: '',
   date: format(new Date(), 'yyyy-MM-dd'),
 };
 
-export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseFormProps) => {
-  const [form, setForm] = useState<ExpenseFormData>(initialForm);
-  const [errors, setErrors] = useState<Partial<ExpenseFormData>>({});
+export const IncomeForm = ({ onSuccess, onClose, inModal = false }: IncomeFormProps) => {
+  const [form, setForm] = useState<IncomeFormData>(initialForm);
+  const [errors, setErrors] = useState<Partial<IncomeFormData>>({});
   const [isLoading, setIsLoading] = useState(false);
   const addToast = useToastStore((s) => s.addToast);
 
   const validate = (): boolean => {
-    const newErrors: Partial<ExpenseFormData> = {};
+    const newErrors: Partial<IncomeFormData> = {};
     if (!form.amount || parseFloat(form.amount) <= 0) newErrors.amount = 'Enter a valid amount';
-    if (!form.category) newErrors.category = 'Select a category' as ExpenseFormData['category'];
+    if (!form.source) newErrors.source = 'Select a source' as IncomeFormData['source'];
     if (!form.description.trim()) newErrors.description = 'Description is required';
     if (!form.date) newErrors.date = 'Date is required';
     setErrors(newErrors);
@@ -46,25 +46,25 @@ export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseForm
 
     setIsLoading(true);
     try {
-      await expensesApi.create({
+      await incomeApi.create({
         amount: parseFloat(form.amount),
-        category: form.category as ExpenseCategory,
+        source: form.source as IncomeSource,
         description: form.description.trim(),
         date: form.date,
       });
-      addToast('Expense added successfully', 'success');
+      addToast('Income added successfully', 'success');
       setForm({ ...initialForm, date: format(new Date(), 'yyyy-MM-dd') });
       setErrors({});
       onSuccess();
       onClose?.();
     } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Failed to add expense', 'error');
+      addToast(err instanceof Error ? err.message : 'Failed to add income', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const update = (field: keyof ExpenseFormData, value: string) => {
+  const update = (field: keyof IncomeFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
@@ -83,19 +83,19 @@ export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseForm
       />
 
       <Select
-        label="Category"
-        value={form.category}
-        onChange={(e) => update('category', e.target.value)}
-        error={errors.category}
+        label="Source"
+        value={form.source}
+        onChange={(e) => update('source', e.target.value)}
+        error={errors.source}
         options={[
-          { value: '', label: 'Select category' },
-          ...CATEGORIES.map((c) => ({ value: c, label: c })),
+          { value: '', label: 'Select source' },
+          ...INCOME_SOURCES.map((s) => ({ value: s, label: s })),
         ]}
       />
 
       <Input
         label="Description"
-        placeholder="What was this expense for?"
+        placeholder="Where did this income come from?"
         value={form.description}
         onChange={(e) => update('description', e.target.value)}
         error={errors.description}
@@ -116,9 +116,9 @@ export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseForm
             Cancel
           </Button>
         )}
-        <Button type="submit" isLoading={isLoading} className="w-full sm:w-auto">
+        <Button type="submit" isLoading={isLoading} className="w-full sm:w-auto bg-[rgb(var(--success))] hover:opacity-90">
           <PlusCircle size={18} />
-          Add Expense
+          Add Income
         </Button>
       </div>
     </form>
@@ -129,8 +129,8 @@ export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseForm
   return (
     <Card className="animate-fade-up">
       <div className="mb-5 flex items-center gap-2">
-        <PlusCircle size={20} className="text-primary" />
-        <h3 className="text-base font-semibold text-foreground sm:text-lg">Add Expense</h3>
+        <PlusCircle size={20} className="text-success" />
+        <h3 className="text-base font-semibold text-foreground sm:text-lg">Add Income</h3>
       </div>
       {formContent}
     </Card>

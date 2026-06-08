@@ -15,6 +15,9 @@ const DashboardPage = lazy(() =>
 const ExpensesPage = lazy(() =>
   import('./features/expenses/ExpensesPage').then((m) => ({ default: m.ExpensesPage }))
 );
+const IncomePage = lazy(() =>
+  import('./features/income/IncomePage').then((m) => ({ default: m.IncomePage }))
+);
 
 const PageLoader = () => (
   <div className="flex min-h-[50vh] items-center justify-center">
@@ -38,6 +41,7 @@ const AnimatedRoutes = () => {
         >
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/expenses" element={<ExpensesPage />} />
+          <Route path="/income" element={<IncomePage />} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

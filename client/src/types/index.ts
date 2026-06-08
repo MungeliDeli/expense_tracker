@@ -74,6 +74,63 @@ export interface ExpenseFilters {
   limit: number;
 }
 
+export type IncomeSource =
+  | 'Salary'
+  | 'Freelance'
+  | 'Business'
+  | 'Investment'
+  | 'Rental'
+  | 'Gifts'
+  | 'Refunds'
+  | 'Other';
+
+export interface Income {
+  _id: string;
+  amount: number;
+  source: IncomeSource;
+  description: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface IncomeFormData {
+  amount: string;
+  source: IncomeSource | '';
+  description: string;
+  date: string;
+}
+
+export interface IncomeResponse {
+  income: Income[];
+  pagination: Pagination;
+}
+
+export interface SourceBreakdown {
+  source: string;
+  amount: number;
+}
+
+export interface IncomeStats {
+  today: number;
+  week: number;
+  month: number;
+  allTime: number;
+  sourceBreakdown: SourceBreakdown[];
+  monthlyTrend: MonthlyTrendPoint[];
+  weeklyBreakdown: WeeklyBreakdownPoint[];
+}
+
+export interface IncomeFilters {
+  search: string;
+  source: string;
+  startDate: string;
+  endDate: string;
+  sortBy: 'date' | 'amount';
+  sortOrder: 'asc' | 'desc';
+  page: number;
+  limit: number;
+}
+
 export type ToastType = 'success' | 'error' | 'info';
 
 export interface Toast {

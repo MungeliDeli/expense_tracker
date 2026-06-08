@@ -1,17 +1,17 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useStats } from '../../hooks/useStats';
-import { SummaryCards } from '../dashboard/SummaryCards';
-import { ChartsSection } from '../dashboard/ChartsSection';
-import { ExpenseForm } from './ExpenseForm';
-import { ExpenseTable } from './ExpenseTable';
+import { useIncomeStats } from '../../hooks/useIncomeStats';
+import { IncomeSummaryCards } from './IncomeSummaryCards';
+import { IncomeChartsSection } from './IncomeChartsSection';
+import { IncomeForm } from './IncomeForm';
+import { IncomeTable } from './IncomeTable';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Modal } from '../../components/ui/Modal';
 
-export const ExpensesPage = () => {
+export const IncomePage = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
-  const { stats, isLoading, error, refetch } = useStats();
+  const { stats, isLoading, error, refetch } = useIncomeStats();
 
   const handleMutate = useCallback(() => {
     setRefreshKey((k) => k + 1);
@@ -27,11 +27,11 @@ export const ExpensesPage = () => {
       transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
     >
       <PageHeader
-        title="Expenses"
-        description="Track spending, view trends, and manage records"
+        title="Income"
+        description="Track earnings, view trends, and manage records"
         onAdd={() => setFormOpen(true)}
-        addLabel="Add Expense"
-        accent="danger"
+        addLabel="Add Income"
+        accent="success"
       />
 
       {error && (
@@ -44,17 +44,17 @@ export const ExpensesPage = () => {
         </motion.div>
       )}
 
-      <SummaryCards stats={stats} isLoading={isLoading} />
-      <ChartsSection stats={stats} isLoading={isLoading} />
-      <ExpenseTable refreshKey={refreshKey} onMutate={handleMutate} />
+      <IncomeSummaryCards stats={stats} isLoading={isLoading} />
+      <IncomeChartsSection stats={stats} isLoading={isLoading} />
+      <IncomeTable refreshKey={refreshKey} onMutate={handleMutate} />
 
       <Modal
         isOpen={formOpen}
         onClose={() => setFormOpen(false)}
-        title="Add Expense"
+        title="Add Income"
         className="max-w-lg"
       >
-        <ExpenseForm
+        <IncomeForm
           inModal
           onSuccess={handleMutate}
           onClose={() => setFormOpen(false)}

@@ -1,4 +1,4 @@
-import type { ExpenseCategory } from '../types';
+import type { ExpenseCategory, IncomeSource } from '../types';
 
 export const CATEGORIES: ExpenseCategory[] = [
   'Food',
@@ -11,6 +11,29 @@ export const CATEGORIES: ExpenseCategory[] = [
   'Health',
   'Education',
   'Other',
+];
+
+export const INCOME_SOURCES: IncomeSource[] = [
+  'Salary',
+  'Freelance',
+  'Business',
+  'Investment',
+  'Rental',
+  'Gifts',
+  'Refunds',
+  'Other',
+];
+
+/** Income charts lean into success/accent tones for visual distinction */
+export const INCOME_CHART_COLORS = [
+  'rgb(var(--success))',
+  'rgb(var(--accent))',
+  'rgb(var(--primary-light))',
+  'rgb(var(--glow-color))',
+  'rgb(var(--blob-2))',
+  'rgb(var(--warning))',
+  'rgb(var(--primary))',
+  'rgb(var(--blob-3))',
 ];
 
 /** All chart colors derive from theme CSS variables */
