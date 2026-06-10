@@ -131,6 +131,40 @@ export interface IncomeFilters {
   limit: number;
 }
 
+export interface PeriodSnapshot {
+  income: number;
+  expenses: number;
+  net: number;
+  spendingRatio: number;
+  savingsRate: number;
+  isHealthy: boolean;
+}
+
+export interface MonthlyComparisonPoint {
+  month: string;
+  income: number;
+  expenses: number;
+  net: number;
+}
+
+export interface WeeklyComparisonPoint {
+  day: string;
+  income: number;
+  expenses: number;
+}
+
+export interface DashboardStats {
+  today: PeriodSnapshot;
+  week: PeriodSnapshot;
+  month: PeriodSnapshot;
+  allTime: PeriodSnapshot;
+  monthlyComparison: MonthlyComparisonPoint[];
+  weeklyComparison: WeeklyComparisonPoint[];
+  categoryBreakdown: CategoryBreakdown[];
+  sourceBreakdown: SourceBreakdown[];
+  spendingCapPercent: number;
+}
+
 export type ToastType = 'success' | 'error' | 'info';
 
 export interface Toast {

@@ -8,6 +8,7 @@ import { Admin } from "./models/Admin";
 import authRoutes from "./routes/auth";
 import expenseRoutes from "./routes/expenses";
 import incomeRoutes from "./routes/income";
+import dashboardRoutes from "./routes/dashboard";
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/income", incomeRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 const seedAdmin = async (): Promise<void> => {
   const existing = await Admin.findOne();

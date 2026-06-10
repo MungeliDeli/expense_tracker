@@ -139,7 +139,7 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
                     Amount <ArrowUpDown size={14} />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-muted w-16" />
+                <th className="px-4 py-3 text-right font-medium text-muted w-24">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -171,10 +171,11 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
                       <button
                         type="button"
                         onClick={() => setDeleteTarget(expense)}
-                        className="rounded-lg p-1.5 text-muted hover:text-danger hover:bg-[rgb(var(--danger))]/10 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-muted hover:text-danger hover:bg-[rgb(var(--danger))]/10 transition-colors"
                         aria-label="Delete expense"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
+                        Delete
                       </button>
                     </td>
                   </tr>
@@ -202,10 +203,11 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(expense)}
-                    className="rounded-lg p-2 text-muted hover:text-danger hover:bg-[rgb(var(--danger))]/10 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:text-danger hover:bg-[rgb(var(--danger))]/10 transition-colors"
                     aria-label="Delete expense"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
+                    Delete
                   </button>
                 </div>
               </div>

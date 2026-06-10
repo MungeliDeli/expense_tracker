@@ -1,4 +1,12 @@
-import type { Expense, ExpenseStats, ExpensesResponse, Income, IncomeStats, IncomeResponse } from '../types';
+import type {
+  DashboardStats,
+  Expense,
+  ExpenseStats,
+  ExpensesResponse,
+  Income,
+  IncomeStats,
+  IncomeResponse,
+} from '../types';
 
 const normalizeApiBase = (value: string | undefined): string => {
   if (!value) return '/api';
@@ -149,6 +157,10 @@ export const incomeApi = {
 
   delete: (id: string) =>
     request<{ message: string }>(`/income/${id}`, { method: 'DELETE' }),
+};
+
+export const dashboardApi = {
+  getStats: () => request<DashboardStats>('/dashboard/stats'),
 };
 
 export { ApiError };
