@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Receipt, Wallet, Sparkles, X } from 'lucide-react';
+import { LayoutDashboard, Receipt, Wallet, PiggyBank, Sparkles, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppLogo, APP_NAME } from '../AppLogo';
 import { cn } from '../../lib/cn';
@@ -26,6 +26,13 @@ const navItems = [
     icon: Wallet,
     accent: '--success',
     description: 'Track earnings',
+  },
+  {
+    to: '/savings',
+    label: 'Savings',
+    icon: PiggyBank,
+    accent: '--primary',
+    description: 'Save & grow',
   },
 ];
 

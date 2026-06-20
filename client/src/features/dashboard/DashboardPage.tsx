@@ -1,11 +1,13 @@
 import { useState, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
+import { format } from 'date-fns';
 import { LayoutDashboard } from 'lucide-react';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
-import { DashboardSummaryCards } from './DashboardSummaryCards';
-import { FinancialHealthBanner } from './FinancialHealthBanner';
+import { MonthFocusHero } from './MonthFocusHero';
+import { BudgetBanner } from './BudgetBanner';
+import { MonthSelector } from './MonthSelector';
+import { AllTimeComparison } from './AllTimeComparison';
 import { ComparisonSection } from './ComparisonSection';
-import { PeriodToggle, type DashboardPeriod } from './PeriodToggle';
 import { Skeleton } from '../../components/ui/Skeleton';
 
 const DashboardCharts = lazy(() =>
@@ -23,25 +25,9 @@ const ChartsFallback = () => (
   </div>
 );
 
-const periodLabels: Record<DashboardPeriod, string> = {
-  today: 'Today',
-  week: 'This Week',
-  month: 'This Month',
-  allTime: 'All Time',
-};
-
 export const DashboardPage = () => {
-  const [period, setPeriod] = useState<DashboardPeriod>('month');
-  const { stats, isLoading, error } = useDashboardStats();
-
-  const snapshot = stats?.[period] ?? {
-    income: 0,
-    expenses: 0,
-    net: 0,
-    spendingRatio: 0,
-    savingsRate: 0,
-    isHealthy: true,
-  };
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const { stats, isLoading, error } = useDashboardStats(selectedMonth);
 
   return (
     <motion.div
@@ -58,10 +44,10 @@ export const DashboardPage = () => {
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground sm:text-2xl">Dashboard</h1>
-            <p className="text-sm text-muted">Your financial overview at a glance</p>
+            <p className="text-sm text-muted">Monthly income, spending & savings at a glance</p>
           </div>
         </div>
-        <PeriodToggle value={period} onChange={setPeriod} />
+        <MonthSelector value={selectedMonth} onChange={setSelectedMonth} />
       </div>
 
       {error && (
@@ -74,15 +60,34 @@ export const DashboardPage = () => {
         </motion.div>
       )}
 
-      {!isLoading && stats && (
-        <FinancialHealthBanner
-          snapshot={snapshot}
-          periodLabel={periodLabels[period]}
-          spendingCapPercent={stats.spendingCapPercent}
-        />
-      )}
+      <MonthFocusHero
+        monthFocus={stats?.monthFocus ?? {
+          label: '',
+          yearMonth: selectedMonth,
+          income: 0,
+          expenses: 0,
+          saved: 0,
+          net: 0,
+          savingsGoal: 0,
+          isSavingsOnTrack: false,
+          savingsGoalProgress: 0,
+        }}
+        previousMonth={stats?.previousMonth ?? {
+          label: '',
+          yearMonth: '',
+          income: 0,
+          expenses: 0,
+          saved: 0,
+          net: 0,
+          savingsGoal: 0,
+          isSavingsOnTrack: false,
+          savingsGoalProgress: 0,
+        }}
+        savingsBalance={stats?.savingsBalance ?? 0}
+        isLoading={isLoading}
+      />
 
-      <DashboardSummaryCards snapshot={snapshot} isLoading={isLoading} />
+      {!isLoading && stats && <BudgetBanner budget={stats.budget} />}
 
       <section>
         <h2 className="mb-4 text-sm font-semibold text-foreground sm:text-base">
@@ -90,6 +95,8 @@ export const DashboardPage = () => {
         </h2>
         <ComparisonSection stats={stats} isLoading={isLoading} />
       </section>
+
+      <AllTimeComparison stats={stats} isLoading={isLoading} />
 
       <section>
         <h2 className="mb-4 text-sm font-semibold text-foreground sm:text-base">

@@ -131,9 +131,18 @@ export const DashboardCharts = memo(({ stats, isLoading }: DashboardChartsProps)
               type="monotone"
               dataKey="net"
               name="Net"
-              stroke="rgb(var(--primary))"
+              stroke="rgb(var(--accent))"
               strokeWidth={2.5}
-              dot={{ fill: 'rgb(var(--primary))', r: 4 }}
+              dot={{ fill: 'rgb(var(--accent))', r: 4 }}
+              animationDuration={900}
+            />
+            <Line
+              type="monotone"
+              dataKey="saved"
+              name="Saved"
+              stroke="rgb(var(--primary))"
+              strokeWidth={2}
+              dot={{ fill: 'rgb(var(--primary))', r: 3 }}
               animationDuration={900}
             />
           </ComposedChart>
@@ -158,11 +167,20 @@ export const DashboardCharts = memo(({ stats, isLoading }: DashboardChartsProps)
             <Tooltip content={<ChartTooltip />} />
             <Area
               type="monotone"
-              dataKey="net"
-              name="Net Savings"
+              dataKey="saved"
+              name="Saved"
               stroke="rgb(var(--primary))"
               fill="url(#netGrad)"
               strokeWidth={2}
+              animationDuration={800}
+            />
+            <Line
+              type="monotone"
+              dataKey="net"
+              name="Net"
+              stroke="rgb(var(--accent))"
+              strokeWidth={2}
+              dot={{ fill: 'rgb(var(--accent))', r: 3 }}
               animationDuration={800}
             />
           </AreaChart>

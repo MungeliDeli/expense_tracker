@@ -49,6 +49,8 @@ export const ComparisonSection = memo(({ stats, isLoading }: ComparisonSectionPr
               <span className="font-semibold text-success">{formatCurrency(snap.income)}</span>
               <ArrowRight size={14} className="shrink-0 text-muted" />
               <span className="font-semibold text-danger">{formatCurrency(snap.expenses)}</span>
+              <ArrowRight size={14} className="shrink-0 text-muted" />
+              <span className="font-semibold text-primary">{formatCurrency(snap.saved)}</span>
             </div>
 
             <motion.div

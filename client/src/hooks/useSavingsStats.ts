@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { dashboardApi } from '../lib/api';
-import type { DashboardStats } from '../types';
+import { savingsApi } from '../lib/api';
+import type { SavingsStats } from '../types';
 
-export const useDashboardStats = (month?: string) => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+export const useSavingsStats = () => {
+  const [stats, setStats] = useState<SavingsStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,14 +11,14 @@ export const useDashboardStats = (month?: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await dashboardApi.getStats(month);
+      const data = await savingsApi.getStats();
       setStats(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard');
+      setError(err instanceof Error ? err.message : 'Failed to load savings stats');
     } finally {
       setIsLoading(false);
     }
-  }, [month]);
+  }, []);
 
   useEffect(() => {
     fetchStats();

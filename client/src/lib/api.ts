@@ -6,6 +6,9 @@ import type {
   Income,
   IncomeStats,
   IncomeResponse,
+  SavingsEntry,
+  SavingsStats,
+  SavingsResponse,
 } from '../types';
 
 const normalizeApiBase = (value: string | undefined): string => {
@@ -160,7 +163,44 @@ export const incomeApi = {
 };
 
 export const dashboardApi = {
-  getStats: () => request<DashboardStats>('/dashboard/stats'),
+  getStats: (month?: string) => {
+    const query = month ? `?month=${encodeURIComponent(month)}` : '';
+    return request<DashboardStats>(`/dashboard/stats${query}`);
+  },
+};
+
+export const savingsApi = {
+  getAll: (params: Record<string, string | number>) => {
+    const query = new URLSearchParams(
+      Object.entries(params).map(([k, v]) => [k, String(v)])
+    ).toString();
+    return request<SavingsResponse>(`/savings?${query}`);
+  },
+
+  getStats: () => request<SavingsStats>('/savings/stats'),
+
+  getGoal: () => request<{ monthlyGoal: number }>('/savings/goal'),
+
+  updateGoal: (monthlyGoal: number) =>
+    request<{ monthlyGoal: number }>('/savings/goal', {
+      method: 'PUT',
+      body: JSON.stringify({ monthlyGoal }),
+    }),
+
+  create: (data: Omit<SavingsEntry, '_id' | 'createdAt'>) =>
+    request<SavingsEntry>('/savings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: Partial<Omit<SavingsEntry, '_id' | 'createdAt'>>) =>
+    request<SavingsEntry>(`/savings/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    request<{ message: string }>(`/savings/${id}`, { method: 'DELETE' }),
 };
 
 export { ApiError };

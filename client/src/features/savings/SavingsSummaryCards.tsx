@@ -1,24 +1,24 @@
 import { memo } from 'react';
-import { Wallet, Receipt, PiggyBank, Percent } from 'lucide-react';
+import { PiggyBank, Target, TrendingUp, Wallet } from 'lucide-react';
 import { MotionCard } from '../../components/ui/MotionCard';
 import { AnimatedCounter } from '../../components/ui/AnimatedCounter';
 import { CardSkeleton } from '../../components/ui/Skeleton';
-import type { PeriodSnapshot } from '../../types';
+import type { SavingsStats } from '../../types';
 import { formatPercent } from '../../lib/format';
 
-interface DashboardSummaryCardsProps {
-  snapshot: PeriodSnapshot;
+interface SavingsSummaryCardsProps {
+  stats: SavingsStats | null;
   isLoading: boolean;
 }
 
 const cards = [
-  { key: 'income' as const, label: 'Income', icon: Wallet, colorVar: '--success' },
-  { key: 'expenses' as const, label: 'Expenses', icon: Receipt, colorVar: '--danger' },
-  { key: 'saved' as const, label: 'Saved', icon: PiggyBank, colorVar: '--primary' },
-  { key: 'savingsRate' as const, label: 'Savings Rate', icon: Percent, colorVar: '--accent', isPercent: true },
+  { key: 'balance' as const, label: 'Total Balance', icon: PiggyBank, colorVar: '--primary' },
+  { key: 'month' as const, label: 'Saved This Month', icon: TrendingUp, colorVar: '--success' },
+  { key: 'monthlyGoal' as const, label: 'Monthly Goal', icon: Target, colorVar: '--accent' },
+  { key: 'goalProgress' as const, label: 'Goal Progress', icon: Wallet, colorVar: '--glow-color', isPercent: true },
 ];
 
-export const DashboardSummaryCards = memo(({ snapshot, isLoading }: DashboardSummaryCardsProps) => {
+export const SavingsSummaryCards = memo(({ stats, isLoading }: SavingsSummaryCardsProps) => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -33,7 +33,7 @@ export const DashboardSummaryCards = memo(({ snapshot, isLoading }: DashboardSum
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {cards.map((card, index) => {
         const Icon = card.icon;
-        const raw = snapshot[card.key];
+        const raw = stats?.[card.key] ?? 0;
         const color = `rgb(var(${card.colorVar}))`;
 
         return (
@@ -46,15 +46,13 @@ export const DashboardSummaryCards = memo(({ snapshot, isLoading }: DashboardSum
             </div>
             <p className="mt-3 text-xs font-medium text-muted sm:text-sm">{card.label}</p>
             {card.isPercent ? (
-              <p className={`mt-1 text-lg font-bold sm:text-2xl ${raw >= 0 ? 'text-success' : 'text-danger'}`}>
+              <p className={`mt-1 text-lg font-bold sm:text-2xl ${stats?.isGoalMet ? 'text-success' : 'text-foreground'}`}>
                 {formatPercent(raw)}
               </p>
             ) : (
               <AnimatedCounter
                 value={raw}
-                className={`mt-1 block text-lg font-bold sm:text-2xl ${
-                  card.key === 'saved' ? (raw >= 0 ? 'text-success' : 'text-danger') : 'text-foreground'
-                }`}
+                className="mt-1 block text-lg font-bold text-foreground sm:text-2xl"
               />
             )}
           </MotionCard>
@@ -64,4 +62,4 @@ export const DashboardSummaryCards = memo(({ snapshot, isLoading }: DashboardSum
   );
 });
 
-DashboardSummaryCards.displayName = 'DashboardSummaryCards';
+SavingsSummaryCards.displayName = 'SavingsSummaryCards';

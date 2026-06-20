@@ -134,6 +134,7 @@ export interface IncomeFilters {
 export interface PeriodSnapshot {
   income: number;
   expenses: number;
+  saved: number;
   net: number;
   spendingRatio: number;
   savingsRate: number;
@@ -144,6 +145,7 @@ export interface MonthlyComparisonPoint {
   month: string;
   income: number;
   expenses: number;
+  saved: number;
   net: number;
 }
 
@@ -153,16 +155,50 @@ export interface WeeklyComparisonPoint {
   expenses: number;
 }
 
+export interface MonthFocus {
+  label: string;
+  yearMonth: string;
+  income: number;
+  expenses: number;
+  saved: number;
+  net: number;
+  savingsGoal: number;
+  isSavingsOnTrack: boolean;
+  savingsGoalProgress: number;
+}
+
+export interface BudgetStatus {
+  limit: number;
+  spent: number;
+  remaining: number;
+  percentUsed: number;
+  isOnTrack: boolean;
+}
+
+export interface BudgetTracking {
+  daily: BudgetStatus;
+  weekly: BudgetStatus;
+  monthly: BudgetStatus;
+  dailyLimit: number;
+  weeklyLimit: number;
+  monthlyLimit: number;
+}
+
 export interface DashboardStats {
+  selectedMonth: string;
+  monthFocus: MonthFocus;
+  previousMonth: MonthFocus;
   today: PeriodSnapshot;
   week: PeriodSnapshot;
   month: PeriodSnapshot;
   allTime: PeriodSnapshot;
+  savingsBalance: number;
   monthlyComparison: MonthlyComparisonPoint[];
   weeklyComparison: WeeklyComparisonPoint[];
   categoryBreakdown: CategoryBreakdown[];
   sourceBreakdown: SourceBreakdown[];
   spendingCapPercent: number;
+  budget: BudgetTracking;
 }
 
 export type ToastType = 'success' | 'error' | 'info';
@@ -171,4 +207,57 @@ export interface Toast {
   id: string;
   message: string;
   type: ToastType;
+}
+
+export type SavingsType = 'deposit' | 'withdrawal';
+
+export interface SavingsEntry {
+  _id: string;
+  amount: number;
+  type: SavingsType;
+  description: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface SavingsFormData {
+  amount: string;
+  type: SavingsType | '';
+  description: string;
+  date: string;
+}
+
+export interface SavingsResponse {
+  savings: SavingsEntry[];
+  pagination: Pagination;
+}
+
+export interface SavingsMonthlyHistory {
+  month: string;
+  deposited: number;
+  goal: number;
+  isOnTrack: boolean;
+}
+
+export interface SavingsStats {
+  balance: number;
+  today: number;
+  week: number;
+  month: number;
+  allTime: number;
+  monthlyGoal: number;
+  isGoalMet: boolean;
+  goalProgress: number;
+  monthlyHistory: SavingsMonthlyHistory[];
+}
+
+export interface SavingsFilters {
+  search: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  sortBy: 'date' | 'amount';
+  sortOrder: 'asc' | 'desc';
+  page: number;
+  limit: number;
 }

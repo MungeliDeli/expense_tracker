@@ -24,6 +24,12 @@ export const INCOME_SOURCES: IncomeSource[] = [
   'Other',
 ];
 
+export const SAVINGS_TYPES = ['deposit', 'withdrawal'] as const;
+
+export const DAILY_BUDGET = 100;
+export const WEEKLY_BUDGET = 700;
+export const MONTHLY_BUDGET = 3000;
+
 /** Income charts lean into success/accent tones for visual distinction */
 export const INCOME_CHART_COLORS = [
   'rgb(var(--success))',
