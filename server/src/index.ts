@@ -10,6 +10,7 @@ import expenseRoutes from "./routes/expenses";
 import incomeRoutes from "./routes/income";
 import dashboardRoutes from "./routes/dashboard";
 import savingsRoutes from "./routes/savings";
+import { startKeepAlive } from "./utils/keepAlive";
 
 dotenv.config();
 
@@ -68,6 +69,7 @@ const startServer = async (): Promise<void> => {
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      startKeepAlive();
     });
   } catch (error) {
     console.error("Failed to start server:", error);

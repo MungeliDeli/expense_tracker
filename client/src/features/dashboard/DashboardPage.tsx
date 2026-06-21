@@ -87,7 +87,7 @@ export const DashboardPage = () => {
         isLoading={isLoading}
       />
 
-      {!isLoading && stats && <BudgetBanner budget={stats.budget} />}
+      {!isLoading && stats?.budget && <BudgetBanner budget={stats.budget} />}
 
       <section>
         <h2 className="mb-4 text-sm font-semibold text-foreground sm:text-base">
