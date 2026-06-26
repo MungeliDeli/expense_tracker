@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { expensesApi } from '../../lib/api';
-import { CATEGORIES } from '../../lib/constants';
+import { CATEGORIES, EXPENSE_TYPES } from '../../lib/constants';
 import { formatCurrency, formatDate } from '../../lib/format';
 import { useExpenses } from '../../hooks/useExpenses';
 import { useToastStore } from '../../store/toastStore';
@@ -16,7 +16,10 @@ import { Modal } from '../../components/ui/Modal';
 import { TableRowSkeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { TablePagination } from '../../components/ui/TablePagination';
-import type { Expense } from '../../types';
+import type { Expense, ExpenseType } from '../../types';
+
+const expenseTypeLabel = (type: ExpenseType | undefined) =>
+  EXPENSE_TYPES.find((t) => t.value === type)?.label ?? 'Day-to-Day';
 
 interface ExpenseTableProps {
   refreshKey: number;
@@ -80,7 +83,7 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
           )}
         </div>
 
-        <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div className="relative sm:col-span-2 lg:col-span-1">
             <Search size={16} className="absolute left-3 top-[38px] text-muted" />
             <Input
@@ -91,6 +94,16 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
               className="pl-9"
             />
           </div>
+
+          <Select
+            label="Type"
+            value={filters.expenseType}
+            onChange={(e) => updateFilters({ expenseType: e.target.value })}
+            options={[
+              { value: 'all', label: 'All Types' },
+              ...EXPENSE_TYPES.map((t) => ({ value: t.value, label: t.label })),
+            ]}
+          />
 
           <Select
             label="Category"
@@ -132,6 +145,7 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
                     Date <ArrowUpDown size={14} />
                   </button>
                 </th>
+                <th className="px-4 py-3 text-left font-medium text-muted">Type</th>
                 <th className="px-4 py-3 text-left font-medium text-muted">Category</th>
                 <th className="px-4 py-3 text-left font-medium text-muted">Description</th>
                 <th className="px-4 py-3 text-right font-medium text-muted">
@@ -145,12 +159,12 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
             <tbody>
               {isLoading
                 ? Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}><td colSpan={5}><TableRowSkeleton /></td></tr>
+                    <tr key={i}><td colSpan={6}><TableRowSkeleton /></td></tr>
                   ))
                 : expenses.length === 0
                 ? (
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <EmptyState icon={Filter} title="No expenses found" description="Try adjusting your filters or add a new expense." />
                     </td>
                   </tr>
@@ -158,6 +172,15 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
                 : expenses.map((expense) => (
                   <tr key={expense._id} className="border-b border-border hover:bg-muted/50 transition-colors">
                     <td className="px-4 py-3 text-foreground">{formatDate(expense.date)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-medium ${
+                        expense.expenseType === 'planned'
+                          ? 'bg-[rgba(var(--accent),0.15)] text-accent'
+                          : 'bg-[rgba(var(--primary),0.15)] text-primary'
+                      }`}>
+                        {expenseTypeLabel(expense.expenseType)}
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-foreground">
                         {expense.category}
@@ -191,11 +214,20 @@ export const ExpenseTable = ({ refreshKey, onMutate }: ExpenseTableProps) => {
             ? <EmptyState icon={Filter} title="No expenses found" description="Try adjusting your filters or add a new expense." />
             : expenses.map((expense) => (
               <div key={expense._id} className="rounded-xl border border-border bg-muted/30 p-4 space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-muted">{formatDate(expense.date)}</span>
-                  <span className="inline-flex rounded-lg bg-muted px-2 py-0.5 text-xs font-medium">
-                    {expense.category}
-                  </span>
+                  <div className="flex gap-1.5">
+                    <span className={`inline-flex rounded-lg px-2 py-0.5 text-[10px] font-medium ${
+                      expense.expenseType === 'planned'
+                        ? 'bg-[rgba(var(--accent),0.15)] text-accent'
+                        : 'bg-[rgba(var(--primary),0.15)] text-primary'
+                    }`}>
+                      {expenseTypeLabel(expense.expenseType)}
+                    </span>
+                    <span className="inline-flex rounded-lg bg-muted px-2 py-0.5 text-xs font-medium">
+                      {expense.category}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-sm text-foreground">{expense.description}</p>
                 <div className="flex items-center justify-between pt-1">

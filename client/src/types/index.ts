@@ -10,10 +10,13 @@ export type ExpenseCategory =
   | 'Education'
   | 'Other';
 
+export type ExpenseType = 'day-to-day' | 'planned';
+
 export interface Expense {
   _id: string;
   amount: number;
   category: ExpenseCategory;
+  expenseType: ExpenseType;
   description: string;
   date: string;
   createdAt: string;
@@ -22,6 +25,7 @@ export interface Expense {
 export interface ExpenseFormData {
   amount: string;
   category: ExpenseCategory | '';
+  expenseType: ExpenseType | '';
   description: string;
   date: string;
 }
@@ -66,6 +70,7 @@ export interface ExpenseStats {
 export interface ExpenseFilters {
   search: string;
   category: string;
+  expenseType: string;
   startDate: string;
   endDate: string;
   sortBy: 'date' | 'amount';
@@ -134,7 +139,10 @@ export interface IncomeFilters {
 export interface PeriodSnapshot {
   income: number;
   expenses: number;
+  dayToDayExpenses: number;
+  plannedExpenses: number;
   saved: number;
+  remaining: number;
   net: number;
   spendingRatio: number;
   savingsRate: number;
@@ -160,7 +168,10 @@ export interface MonthFocus {
   yearMonth: string;
   income: number;
   expenses: number;
+  dayToDayExpenses: number;
+  plannedExpenses: number;
   saved: number;
+  remaining: number;
   net: number;
   savingsGoal: number;
   isSavingsOnTrack: boolean;

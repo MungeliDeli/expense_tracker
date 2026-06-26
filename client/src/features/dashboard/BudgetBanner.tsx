@@ -49,7 +49,7 @@ export const BudgetBanner = memo(({ budget }: BudgetBannerProps) => {
             {allOnTrack ? 'Within budget limits' : 'Over budget — slow down spending'}
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Limits: {formatCurrency(DAILY_BUDGET)}/day · {formatCurrency(WEEKLY_BUDGET)}/week · {formatCurrency(MONTHLY_BUDGET)}/month
+            Only day-to-day expenses count toward limits: {formatCurrency(DAILY_BUDGET)}/day · {formatCurrency(WEEKLY_BUDGET)}/week · {formatCurrency(MONTHLY_BUDGET)}/month
           </p>
         </div>
       </div>

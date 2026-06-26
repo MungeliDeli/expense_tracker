@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Expense, EXPENSE_CATEGORIES } from '../models/Expense';
+import { Expense, EXPENSE_CATEGORIES, EXPENSE_TYPES } from '../models/Expense';
 import { calculateStats } from '../utils/stats';
 
 export const getExpenses = async (req: Request, res: Response): Promise<void> => {
@@ -7,6 +7,7 @@ export const getExpenses = async (req: Request, res: Response): Promise<void> =>
     const {
       search,
       category,
+      expenseType,
       startDate,
       endDate,
       sortBy = 'date',
@@ -19,6 +20,10 @@ export const getExpenses = async (req: Request, res: Response): Promise<void> =>
 
     if (category && typeof category === 'string' && category !== 'all') {
       filter.category = category;
+    }
+
+    if (expenseType && typeof expenseType === 'string' && expenseType !== 'all') {
+      filter.expenseType = expenseType;
     }
 
     if (startDate || endDate) {
@@ -76,7 +81,7 @@ export const getStats = async (_req: Request, res: Response): Promise<void> => {
 
 export const createExpense = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { amount, category, description, date } = req.body;
+    const { amount, category, expenseType, description, date } = req.body;
 
     if (!amount || amount <= 0) {
       res.status(400).json({ message: 'Valid amount is required' });
@@ -85,6 +90,11 @@ export const createExpense = async (req: Request, res: Response): Promise<void> 
 
     if (!category || !EXPENSE_CATEGORIES.includes(category)) {
       res.status(400).json({ message: 'Valid category is required' });
+      return;
+    }
+
+    if (!expenseType || !EXPENSE_TYPES.includes(expenseType)) {
+      res.status(400).json({ message: 'Valid expense type is required' });
       return;
     }
 
@@ -101,6 +111,7 @@ export const createExpense = async (req: Request, res: Response): Promise<void> 
     const expense = await Expense.create({
       amount: Number(amount),
       category,
+      expenseType,
       description: description.trim(),
       date: new Date(date),
     });
@@ -115,7 +126,7 @@ export const createExpense = async (req: Request, res: Response): Promise<void> 
 export const updateExpense = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { amount, category, description, date } = req.body;
+    const { amount, category, expenseType, description, date } = req.body;
 
     const expense = await Expense.findById(id);
     if (!expense) {
@@ -137,6 +148,14 @@ export const updateExpense = async (req: Request, res: Response): Promise<void> 
         return;
       }
       expense.category = category;
+    }
+
+    if (expenseType !== undefined) {
+      if (!EXPENSE_TYPES.includes(expenseType)) {
+        res.status(400).json({ message: 'Valid expense type is required' });
+        return;
+      }
+      expense.expenseType = expenseType;
     }
 
     if (description !== undefined) {

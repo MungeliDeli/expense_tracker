@@ -5,6 +5,7 @@ import type { Expense, ExpenseFilters, Pagination } from '../types';
 const defaultFilters: ExpenseFilters = {
   search: '',
   category: 'all',
+  expenseType: 'all',
   startDate: '',
   endDate: '',
   sortBy: 'date',
@@ -32,6 +33,7 @@ export const useExpenses = (initialFilters?: Partial<ExpenseFilters>) => {
       };
       if (filters.search) params.search = filters.search;
       if (filters.category !== 'all') params.category = filters.category;
+      if (filters.expenseType !== 'all') params.expenseType = filters.expenseType;
       if (filters.startDate) params.startDate = filters.startDate;
       if (filters.endDate) params.endDate = filters.endDate;
 

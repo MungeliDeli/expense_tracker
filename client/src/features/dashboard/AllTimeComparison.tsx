@@ -29,10 +29,11 @@ export const AllTimeComparison = memo(({ stats, isLoading }: AllTimeComparisonPr
 
   const items = [
     { label: 'Total Earned', value: allTime.income, color: 'text-success' },
-    { label: 'Total Spent', value: allTime.expenses, color: 'text-danger' },
+    { label: 'Day-to-Day Spent', value: allTime.dayToDayExpenses, color: 'text-danger' },
+    { label: 'Planned Spent', value: allTime.plannedExpenses, color: 'text-warning' },
     { label: 'Total Saved', value: allTime.saved, color: 'text-primary' },
+    { label: 'Remaining', value: allTime.remaining, color: allTime.remaining >= 0 ? 'text-accent' : 'text-danger' },
     { label: 'Savings Balance', value: savingsBalance, color: 'text-accent' },
-    { label: 'Net (Income − Expenses)', value: allTime.net, color: allTime.net >= 0 ? 'text-success' : 'text-danger' },
     { label: 'Savings Rate', value: formatPercent(allTime.savingsRate), color: 'text-foreground', isText: true },
   ];
 
@@ -40,7 +41,7 @@ export const AllTimeComparison = memo(({ stats, isLoading }: AllTimeComparisonPr
     <div className="space-y-3">
       <div>
         <h2 className="text-sm font-semibold text-foreground sm:text-base">All-Time Summary</h2>
-        <p className="text-xs text-muted">Lifetime income, spending, and savings compared</p>
+        <p className="text-xs text-muted">Income split across day-to-day, planned purchases, and savings</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item, index) => (

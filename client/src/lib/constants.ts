@@ -26,6 +26,11 @@ export const INCOME_SOURCES: IncomeSource[] = [
 
 export const SAVINGS_TYPES = ['deposit', 'withdrawal'] as const;
 
+export const EXPENSE_TYPES = [
+  { value: 'day-to-day' as const, label: 'Day-to-Day', description: 'Regular spending (counts toward daily budget)' },
+  { value: 'planned' as const, label: 'Planned Purchase', description: 'Large one-off purchases (e.g. shoes, gadgets)' },
+];
+
 export const DAILY_BUDGET = 100;
 export const WEEKLY_BUDGET = 700;
 export const MONTHLY_BUDGET = 3000;

@@ -3,13 +3,13 @@ import type { FormEvent } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { expensesApi } from '../../lib/api';
-import { CATEGORIES } from '../../lib/constants';
+import { CATEGORIES, EXPENSE_TYPES } from '../../lib/constants';
 import { useToastStore } from '../../store/toastStore';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Card } from '../../components/ui/Card';
-import type { ExpenseCategory, ExpenseFormData } from '../../types';
+import type { ExpenseCategory, ExpenseFormData, ExpenseType } from '../../types';
 
 interface ExpenseFormProps {
   onSuccess: () => void;
@@ -20,6 +20,7 @@ interface ExpenseFormProps {
 const initialForm: ExpenseFormData = {
   amount: '',
   category: '',
+  expenseType: 'day-to-day',
   description: '',
   date: format(new Date(), 'yyyy-MM-dd'),
 };
@@ -34,6 +35,7 @@ export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseForm
     const newErrors: Partial<ExpenseFormData> = {};
     if (!form.amount || parseFloat(form.amount) <= 0) newErrors.amount = 'Enter a valid amount';
     if (!form.category) newErrors.category = 'Select a category' as ExpenseFormData['category'];
+    if (!form.expenseType) newErrors.expenseType = 'Select expense type' as ExpenseFormData['expenseType'];
     if (!form.description.trim()) newErrors.description = 'Description is required';
     if (!form.date) newErrors.date = 'Date is required';
     setErrors(newErrors);
@@ -49,6 +51,7 @@ export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseForm
       await expensesApi.create({
         amount: parseFloat(form.amount),
         category: form.category as ExpenseCategory,
+        expenseType: form.expenseType as ExpenseType,
         description: form.description.trim(),
         date: form.date,
       });
@@ -71,6 +74,24 @@ export const ExpenseForm = ({ onSuccess, onClose, inModal = false }: ExpenseForm
 
   const formContent = (
     <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+      <Select
+        label="Expense Type"
+        value={form.expenseType}
+        onChange={(e) => update('expenseType', e.target.value)}
+        error={errors.expenseType}
+        className="sm:col-span-2"
+        options={[
+          { value: '', label: 'Select type' },
+          ...EXPENSE_TYPES.map((t) => ({ value: t.value, label: t.label })),
+        ]}
+      />
+
+      {form.expenseType && (
+        <p className="sm:col-span-2 -mt-2 text-xs text-muted">
+          {EXPENSE_TYPES.find((t) => t.value === form.expenseType)?.description}
+        </p>
+      )}
+
       <Input
         label="Amount (ZMW)"
         type="number"

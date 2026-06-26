@@ -39,18 +39,29 @@ export const ComparisonSection = memo(({ stats, isLoading }: ComparisonSectionPr
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {periods.map((period, index) => {
         const snap = stats[period.key];
-        const positive = snap.net >= 0;
+        const positive = snap.remaining >= 0;
 
         return (
           <MotionCard key={period.key} delay={0.1 + index * 0.06} hover>
             <p className="text-xs font-medium uppercase tracking-wider text-muted">{period.label}</p>
 
-            <div className="mt-4 flex items-center gap-2 text-sm">
-              <span className="font-semibold text-success">{formatCurrency(snap.income)}</span>
-              <ArrowRight size={14} className="shrink-0 text-muted" />
-              <span className="font-semibold text-danger">{formatCurrency(snap.expenses)}</span>
-              <ArrowRight size={14} className="shrink-0 text-muted" />
-              <span className="font-semibold text-primary">{formatCurrency(snap.saved)}</span>
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted">Income</span>
+                <span className="font-semibold text-success">{formatCurrency(snap.income)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted">Day-to-Day</span>
+                <span className="font-semibold text-danger">{formatCurrency(snap.dayToDayExpenses)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted">Planned</span>
+                <span className="font-semibold text-warning">{formatCurrency(snap.plannedExpenses)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted">Saved</span>
+                <span className="font-semibold text-primary">{formatCurrency(snap.saved)}</span>
+              </div>
             </div>
 
             <motion.div
@@ -60,22 +71,31 @@ export const ComparisonSection = memo(({ stats, isLoading }: ComparisonSectionPr
               transition={{ duration: 0.6, delay: index * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
               className="mt-3 h-2 origin-left overflow-hidden rounded-full bg-muted"
             >
-              <div className="flex h-full">
-                {snap.income > 0 && (
+              {snap.income > 0 && (
+                <div className="flex h-full">
                   <div
-                    className="h-full bg-success transition-all duration-500"
-                    style={{ width: `${Math.min((snap.expenses / snap.income) * 100, 100)}%` }}
+                    className="h-full bg-danger"
+                    style={{ width: `${(snap.dayToDayExpenses / snap.income) * 100}%` }}
                   />
-                )}
-              </div>
+                  <div
+                    className="h-full bg-warning"
+                    style={{ width: `${(snap.plannedExpenses / snap.income) * 100}%` }}
+                  />
+                  <div
+                    className="h-full bg-primary"
+                    style={{ width: `${(snap.saved / snap.income) * 100}%` }}
+                  />
+                </div>
+              )}
             </motion.div>
 
             <div className="mt-3 flex items-center justify-between text-xs">
               <span className="text-muted">
                 Spend {formatPercent(snap.spendingRatio)}
               </span>
-              <span className={`font-semibold ${positive ? 'text-success' : 'text-danger'}`}>
-                {positive ? '+' : ''}{formatCurrency(snap.net)}
+              <span className={`flex items-center gap-1 font-semibold ${positive ? 'text-success' : 'text-danger'}`}>
+                <ArrowRight size={12} className="text-muted" />
+                {formatCurrency(snap.remaining)}
               </span>
             </div>
 

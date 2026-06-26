@@ -11,7 +11,7 @@ import {
   parse,
   isValid,
 } from 'date-fns';
-import { Expense } from '../models/Expense';
+import { Expense, type ExpenseType } from '../models/Expense';
 import { Income } from '../models/Income';
 import { Savings } from '../models/Savings';
 import { getOrCreateSettings } from '../models/Settings';
@@ -28,7 +28,10 @@ export const SPENDING_CAP_PERCENT = 20;
 export interface PeriodSnapshot {
   income: number;
   expenses: number;
+  dayToDayExpenses: number;
+  plannedExpenses: number;
   saved: number;
+  remaining: number;
   net: number;
   spendingRatio: number;
   savingsRate: number;
@@ -54,7 +57,10 @@ export interface MonthFocus {
   yearMonth: string;
   income: number;
   expenses: number;
+  dayToDayExpenses: number;
+  plannedExpenses: number;
   saved: number;
+  remaining: number;
   net: number;
   savingsGoal: number;
   isSavingsOnTrack: boolean;
@@ -91,12 +97,39 @@ const sumInRange = async (
   model: typeof Expense | typeof Income,
   start: Date,
   end: Date,
+  extraMatch: Record<string, unknown> = {},
 ): Promise<number> => {
   const [result] = await model.aggregate<{ total: number }>([
-    { $match: { date: { $gte: start, $lte: end } } },
+    { $match: { date: { $gte: start, $lte: end }, ...extraMatch } },
     { $group: { _id: null, total: { $sum: '$amount' } } },
   ]);
   return result?.total ?? 0;
+};
+
+const sumExpensesInRange = (
+  start: Date,
+  end: Date,
+  expenseType?: ExpenseType,
+): Promise<number> => {
+  const typeMatch =
+    expenseType === 'day-to-day'
+      ? { $or: [{ expenseType: 'day-to-day' }, { expenseType: { $exists: false } }] }
+      : expenseType
+        ? { expenseType }
+        : {};
+
+  return sumInRange(Expense, start, end, typeMatch);
+};
+
+const sumExpenseBreakdown = async (
+  start: Date,
+  end: Date,
+): Promise<{ dayToDay: number; planned: number; total: number }> => {
+  const [dayToDay, planned] = await Promise.all([
+    sumExpensesInRange(start, end, 'day-to-day'),
+    sumExpensesInRange(start, end, 'planned'),
+  ]);
+  return { dayToDay, planned, total: dayToDay + planned };
 };
 
 const sumSavingsDeposits = async (start: Date, end: Date): Promise<number> => {
@@ -121,7 +154,14 @@ const getSavingsBalance = async (): Promise<number> => {
   return (deposits[0]?.total ?? 0) - (withdrawals[0]?.total ?? 0);
 };
 
-const buildSnapshot = (income: number, expenses: number, saved: number): PeriodSnapshot => {
+const buildSnapshot = (
+  income: number,
+  dayToDayExpenses: number,
+  plannedExpenses: number,
+  saved: number,
+): PeriodSnapshot => {
+  const expenses = dayToDayExpenses + plannedExpenses;
+  const remaining = income - expenses - saved;
   const net = income - expenses;
   const spendingRatio = income > 0 ? (expenses / income) * 100 : expenses > 0 ? 100 : 0;
   const savingsRate = income > 0 ? (saved / income) * 100 : 0;
@@ -129,7 +169,10 @@ const buildSnapshot = (income: number, expenses: number, saved: number): PeriodS
   return {
     income,
     expenses,
+    dayToDayExpenses,
+    plannedExpenses,
     saved,
+    remaining,
     net,
     spendingRatio,
     savingsRate,
@@ -143,12 +186,14 @@ const buildMonthFocus = async (
 ): Promise<MonthFocus> => {
   const start = startOfMonth(monthDate);
   const end = endOfMonth(monthDate);
-  const [income, expenses, saved] = await Promise.all([
+  const [income, expenseBreakdown, saved] = await Promise.all([
     sumInRange(Income, start, end),
-    sumInRange(Expense, start, end),
+    sumExpenseBreakdown(start, end),
     sumSavingsDeposits(start, end),
   ]);
 
+  const { dayToDay: dayToDayExpenses, planned: plannedExpenses, total: expenses } = expenseBreakdown;
+  const remaining = income - expenses - saved;
   const goalProgress = savingsGoal > 0 ? Math.min((saved / savingsGoal) * 100, 100) : saved > 0 ? 100 : 0;
 
   return {
@@ -156,7 +201,10 @@ const buildMonthFocus = async (
     yearMonth: format(monthDate, 'yyyy-MM'),
     income,
     expenses,
+    dayToDayExpenses,
+    plannedExpenses,
     saved,
+    remaining,
     net: income - expenses,
     savingsGoal,
     isSavingsOnTrack: savingsGoal > 0 ? saved >= savingsGoal : saved > 0,
@@ -233,13 +281,13 @@ export const calculateDashboardStats = async (monthParam?: string): Promise<Dash
 
   const [
     todayIncome,
-    todayExpenses,
+    todayExpenseBreakdown,
     weekIncome,
-    weekExpenses,
+    weekExpenseBreakdown,
     monthIncome,
-    monthExpenses,
+    monthExpenseBreakdown,
     allIncome,
-    allExpenses,
+    allExpenseBreakdown,
     todaySaved,
     weekSaved,
     monthSaved,
@@ -256,13 +304,13 @@ export const calculateDashboardStats = async (monthParam?: string): Promise<Dash
     previousMonth,
   ] = await Promise.all([
     sumInRange(Income, todayStart, todayEnd),
-    sumInRange(Expense, todayStart, todayEnd),
+    sumExpenseBreakdown(todayStart, todayEnd),
     sumInRange(Income, weekStart, weekEnd),
-    sumInRange(Expense, weekStart, weekEnd),
+    sumExpenseBreakdown(weekStart, weekEnd),
     sumInRange(Income, monthStart, monthEnd),
-    sumInRange(Expense, monthStart, monthEnd),
+    sumExpenseBreakdown(monthStart, monthEnd),
     sumInRange(Income, new Date(0), now),
-    sumInRange(Expense, new Date(0), now),
+    sumExpenseBreakdown(new Date(0), now),
     sumSavingsDeposits(todayStart, todayEnd),
     sumSavingsDeposits(weekStart, weekEnd),
     sumSavingsDeposits(monthStart, monthEnd),
@@ -333,9 +381,9 @@ export const calculateDashboardStats = async (monthParam?: string): Promise<Dash
   }
 
   const budget: BudgetTracking = {
-    daily: buildBudgetStatus(todayExpenses, DAILY_SPENDING_BUDGET),
-    weekly: buildBudgetStatus(weekExpenses, WEEKLY_SPENDING_BUDGET),
-    monthly: buildBudgetStatus(monthExpenses, MONTHLY_SPENDING_BUDGET),
+    daily: buildBudgetStatus(todayExpenseBreakdown.dayToDay, DAILY_SPENDING_BUDGET),
+    weekly: buildBudgetStatus(weekExpenseBreakdown.dayToDay, WEEKLY_SPENDING_BUDGET),
+    monthly: buildBudgetStatus(monthExpenseBreakdown.dayToDay, MONTHLY_SPENDING_BUDGET),
     dailyLimit: DAILY_SPENDING_BUDGET,
     weeklyLimit: WEEKLY_SPENDING_BUDGET,
     monthlyLimit: MONTHLY_SPENDING_BUDGET,
@@ -345,10 +393,30 @@ export const calculateDashboardStats = async (monthParam?: string): Promise<Dash
     selectedMonth: format(selectedDate, 'yyyy-MM'),
     monthFocus,
     previousMonth,
-    today: buildSnapshot(todayIncome, todayExpenses, todaySaved),
-    week: buildSnapshot(weekIncome, weekExpenses, weekSaved),
-    month: buildSnapshot(monthIncome, monthExpenses, monthSaved),
-    allTime: buildSnapshot(allIncome, allExpenses, allSaved),
+    today: buildSnapshot(
+      todayIncome,
+      todayExpenseBreakdown.dayToDay,
+      todayExpenseBreakdown.planned,
+      todaySaved,
+    ),
+    week: buildSnapshot(
+      weekIncome,
+      weekExpenseBreakdown.dayToDay,
+      weekExpenseBreakdown.planned,
+      weekSaved,
+    ),
+    month: buildSnapshot(
+      monthIncome,
+      monthExpenseBreakdown.dayToDay,
+      monthExpenseBreakdown.planned,
+      monthSaved,
+    ),
+    allTime: buildSnapshot(
+      allIncome,
+      allExpenseBreakdown.dayToDay,
+      allExpenseBreakdown.planned,
+      allSaved,
+    ),
     savingsBalance,
     monthlyComparison,
     weeklyComparison,

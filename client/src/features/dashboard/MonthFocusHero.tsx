@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { Wallet, Receipt, PiggyBank, TrendingUp } from 'lucide-react';
+import { Wallet, Receipt, ShoppingBag, PiggyBank, CircleDollarSign } from 'lucide-react';
 import { AnimatedCounter } from '../../components/ui/AnimatedCounter';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import type { MonthFocus } from '../../types';
@@ -21,8 +21,8 @@ export const MonthFocusHero = memo(({
 }: MonthFocusHeroProps) => {
   if (isLoading) {
     return (
-      <div className="grid gap-4 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
           <CardSkeleton key={i} />
         ))}
       </div>
@@ -37,16 +37,21 @@ export const MonthFocusHero = memo(({
       colorVar: '--success',
       sub: previousMonth.income > 0
         ? `vs ${formatCurrency(previousMonth.income)} last month`
-        : 'This month',
+        : 'Total income',
     },
     {
-      label: 'Spent',
-      value: monthFocus.expenses,
+      label: 'Day-to-Day',
+      value: monthFocus.dayToDayExpenses,
       icon: Receipt,
       colorVar: '--danger',
-      sub: previousMonth.expenses > 0
-        ? `vs ${formatCurrency(previousMonth.expenses)} last month`
-        : 'Day-to-day spending',
+      sub: 'Regular spending',
+    },
+    {
+      label: 'Planned',
+      value: monthFocus.plannedExpenses,
+      icon: ShoppingBag,
+      colorVar: '--warning',
+      sub: 'Large purchases',
     },
     {
       label: 'Saved',
@@ -58,13 +63,23 @@ export const MonthFocusHero = memo(({
         : 'Deposited this month',
     },
     {
-      label: 'Balance',
-      value: savingsBalance,
-      icon: TrendingUp,
+      label: 'Remaining',
+      value: monthFocus.remaining,
+      icon: CircleDollarSign,
       colorVar: '--accent',
-      sub: 'Total savings pot',
+      sub: `Pot balance: ${formatCurrency(savingsBalance)}`,
     },
   ];
+
+  const income = monthFocus.income;
+  const segments = income > 0
+    ? [
+        { key: 'dayToDay', amount: monthFocus.dayToDayExpenses, color: 'bg-danger' },
+        { key: 'planned', amount: monthFocus.plannedExpenses, color: 'bg-warning' },
+        { key: 'saved', amount: monthFocus.saved, color: 'bg-primary' },
+        { key: 'remaining', amount: Math.max(monthFocus.remaining, 0), color: 'bg-accent' },
+      ]
+    : [];
 
   return (
     <div className="space-y-4">
@@ -86,7 +101,7 @@ export const MonthFocusHero = memo(({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {cards.map((card, index) => {
           const Icon = card.icon;
           return (
@@ -106,13 +121,48 @@ export const MonthFocusHero = memo(({
               <p className="mt-3 text-xs font-medium text-muted sm:text-sm">{card.label}</p>
               <AnimatedCounter
                 value={card.value}
-                className="mt-1 block text-xl font-bold text-foreground sm:text-2xl"
+                className={`mt-1 block text-xl font-bold sm:text-2xl ${
+                  card.label === 'Remaining' && card.value < 0 ? 'text-danger' : 'text-foreground'
+                }`}
               />
               <p className="mt-1 text-[11px] text-muted">{card.sub}</p>
             </motion.div>
           );
         })}
       </div>
+
+      {income > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 card-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted">Income Breakdown</p>
+          <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-muted">
+            {segments.map((seg) => (
+              <div
+                key={seg.key}
+                className={`h-full ${seg.color} transition-all duration-500`}
+                style={{ width: `${(seg.amount / income) * 100}%` }}
+              />
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-danger" />
+              Day-to-Day {formatCurrency(monthFocus.dayToDayExpenses)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-warning" />
+              Planned {formatCurrency(monthFocus.plannedExpenses)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-primary" />
+              Saved {formatCurrency(monthFocus.saved)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-accent" />
+              Remaining {formatCurrency(monthFocus.remaining)}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
